@@ -1,144 +1,116 @@
+🤖 AI Customer Support Chatbot
 
+A modern, intelligent chatbot designed for customer support, powered by Google's Gemini API and built with Streamlit. This application logs conversations to a MongoDB database and is ready for deployment.
 
-1. Introduction
+✨ Features
 
-The streamlit_app.py script is a self-contained web application built with Streamlit. It creates a user-friendly chat interface that connects to Google's Gemini API for generating AI responses and uses MongoDB to log the conversation history.
+Intelligent & Contextual Responses: Leverages the power of Google's Gemini API for human-like and helpful answers.
 
-2. File Structure
+Conversation Logging: All user interactions are automatically logged to a MongoDB database for review, analysis, and service improvement.
 
-The project relies on a few key files to function correctly:
+Easy-to-Use Interface: Built with Streamlit for a clean, simple, and intuitive user experience.
 
-streamlit_app.py: The main application script containing all the logic.
+Customizable Persona: The chatbot's personality, rules, and knowledge base can be easily configured through a central system instruction prompt.
 
-requirements.txt: Lists all the necessary Python libraries for the project.
+Deployment Ready: Comes with all necessary configurations for a seamless deployment on cloud platforms like Render.
 
-.env: A local file (not uploaded to GitHub) that securely stores the API keys and database connection string.
+🛠️ Tech Stack
 
-3. Core Dependencies
+Frontend: Streamlit
 
-streamlit: The main framework for building the web application's user interface.
+Backend: Python/Flask
 
-requests: Used to make HTTP POST requests to the Gemini API endpoint.
+AI Model: Google Gemini API
 
-pymongo: The official Python driver for interacting with the MongoDB database.
+Database: MongoDB Atlas
 
-python-dotenv: Loads the environment variables from the .env file for local development.
+Deployment: Render
 
-certifi: Provides SSL certificates to ensure a secure connection to MongoDB, which is crucial for deployment.
+🚀 Getting Started
 
-4. Code Breakdown
+To get a local copy up and running, please follow these simple steps.
 
-The script is organized into several logical sections, from configuration to execution.
+Prerequisites
 
-4.1. Initial Setup and Imports
+Python 3.8 or higher
 
-import os
-import requests
-import streamlit as st
-# ... other imports
-from dotenv import load_dotenv
+A Google Gemini API Key
 
-load_dotenv()
+A MongoDB Atlas account and a connection string
 
+Installation & Setup
 
-The script begins by importing all required libraries.
+Clone the Repository
 
-load_dotenv() is called immediately to load the GEMINI_API_KEY and MONGO_URI from your .env file into the environment.
+git clone [https://github.com/your-username/your-repository-name.git](https://github.com/your-username/your-repository-name.git)
+cd your-repository-name
 
-4.2. Page and UI Configuration
 
-st.set_page_config(...)
-st.title("🤖 AI Customer Support Chatbot")
-st.caption("Powered by Google's Gemini API & MongoDB")
+Create a Virtual Environment
+It's highly recommended to use a virtual environment to manage project dependencies.
 
+# For Windows
+python -m venv venv
+venv\Scripts\activate
 
-st.set_page_config(): Sets the browser tab title, icon, and page layout.
+# For macOS/Linux
+python3 -m venv venv
+source venv/bin/activate
 
-st.title() and st.caption(): Display the main title and subtitle of the application.
 
-4.3. Gemini API Configuration
+Install Dependencies
+Install all the required Python libraries using the requirements.txt file.
 
-SYSTEM_INSTRUCTION = """..."""
-API_KEY = os.environ.get("GEMINI_API_KEY")
-API_URL = f"..."
+pip install -r requirements.txt
 
 
-SYSTEM_INSTRUCTION: This multi-line string is a crucial prompt that defines the chatbot's persona, rules, and boundaries. It tells the Gemini model how to behave.
+Set Up Environment Variables
+The application requires API keys for both Gemini and MongoDB.
 
-API Key Handling: The code first tries to get the GEMINI_API_KEY from Streamlit's secrets (for deployment) and falls back to environment variables (for local development). The app stops if the key is not found.
+Create a new file in the root of your project named .env.
 
-API_URL: The full URL endpoint for making requests to the Gemini model.
+Replace the placeholder values with your actual credentials.
 
-4.4. MongoDB Configuration
+.env file:
 
-@st.cache_resource
-def init_connection():
-    # ...
-    client = MongoClient(mongo_uri, tlsCAFile=certifi.where(), ...)
-    return client
+# Your Google Gemini API Key
+GEMINI_API_KEY="YOUR_GEMINI_API_KEY_HERE"
 
-client = init_connection()
+# Your MongoDB Atlas Connection String
+MONGO_URI="YOUR_MONGODB_CONNECTION_STRING_HERE"
 
 
-The @st.cache_resource decorator is very important. It tells Streamlit to run this function only once to establish the database connection and then reuse the same connection for all subsequent user sessions, which is highly efficient.
+▶️ Running the Application
 
-The function retrieves the MONGO_URI and connects to the database.
+Once the setup is complete, you can start the Streamlit application with the following command:
 
-tlsCAFile=certifi.where() is the key fix for SSL handshake errors that often occur during deployment.
+streamlit run streamlit_app.py
 
-4.5. Database Helper Functions
 
-The script includes several small functions to interact with the database:
+The application will open in your default web browser at http://localhost:8501.
 
-get_db(): Returns the specific database instance (chatbot_db).
+☁️ Deployment
 
-get_collection(): Returns the collection where logs are stored (chat_logs).
+This application is ready to be deployed on Render.
 
-log_to_mongodb(): Inserts a new document containing the user's prompt, the bot's response, and a timestamp into the collection.
+Push your project to a GitHub repository.
 
-4.6. Chat History Management
+On the Render dashboard, create a new Web Service and connect it to your repository.
 
-if "messages" not in st.session_state:
-    st.session_state.messages = [...]
+Use the following settings during configuration:
 
+Environment: Python 3
 
-st.session_state is a special Streamlit feature that acts like a memory for the application.
+Build Command: pip install -r requirements.txt
 
-This code initializes a list called messages in the session state the very first time a user opens the app. This list stores the entire conversation history and persists between reruns.
+Start Command: streamlit run streamlit_app.py --server.port $PORT --server.address 0.0.0.0
 
-4.7. Core Logic and User Input
+In the Advanced > Environment Variables section, add your GEMINI_API_KEY and MONGO_URI as secrets.
 
-This is the main interactive part of the app.
+Deploy the service.
 
-# --- Display Chat History ---
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+Important: Remember to update your MongoDB Atlas Network Access list to allow connections from anywhere (0.0.0.0/0) for the deployed app to connect successfully.
 
-# --- User Input Handling ---
-if prompt := st.chat_input("..."):
-    # ...
-    st.rerun()
+📄 License
 
-
-Display Loop: The script first iterates through all messages currently stored in st.session_state.messages and displays them on the screen. This ensures the full conversation is always visible.
-
-Input Handling: st.chat_input() creates the text input box at the bottom. When a user types a message and hits Enter:
-
-The user's prompt is added to the st.session_state.messages list.
-
-The get_gemini_response() function is called, sending the entire chat history to the API.
-
-A "Thinking..." spinner is shown while waiting.
-
-The AI's response is received and also added to the st.session_state.messages list.
-
-The interaction is logged to MongoDB.
-
-st.rerun() is called. This forces the entire script to run again from the top, which causes the "Display Loop" to redraw the screen with the new messages.
-
-5. How to Customize
-
-Change the Bot's Personality: The easiest way to customize the chatbot is by modifying the SYSTEM_INSTRUCTION string. You can change its name, its rules, and the context it's aware of.
-
-Change the Database/Collection Name: You can easily change the names used in the get_db() and get_collection() functions if you prefer to use different ones.
+This project is distributed under the MIT License. See LICENSE for more information.
