@@ -1,10 +1,12 @@
+
 import os
 import requests
 import streamlit as st
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from pymongo.server_api import ServerApi
 from datetime import datetime
 from dotenv import load_dotenv
+import certifi  # Import the certifi library
 
 # Load environment variables from .env file at the very beginning
 load_dotenv()
@@ -18,12 +20,11 @@ st.set_page_config(
 
 # --- UI Setup ---
 st.title("🤖 AI Customer Support Chatbot")
-st.caption("")
+st.caption("Powered by Google's Gemini API & MongoDB")
 
 # --- Gemini API Configuration ---
 # System instruction to guide the chatbot's behavior
 SYSTEM_INSTRUCTION = """
-
 You are 'SupportBot', a friendly and professional AI customer support assistant.
 Your primary goal is to provide clear, accurate, and helpful information to users.
 
@@ -43,6 +44,7 @@ Your primary goal is to provide clear, accurate, and helpful information to user
 - For your reference, the current date is Monday, October 20, 2025.
 - You are assisting users primarily based in India.
 """
+
 # Fetch Gemini API key from Streamlit secrets or environment variables
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -72,7 +74,8 @@ def init_connection():
         return None
         
     try:
-        client = MongoClient(mongo_uri, server_api=ServerApi('1'))
+        # Use certifi to provide the necessary SSL certificates for deployment
+        client = MongoClient(mongo_uri, tlsCAFile=certifi.where(), server_api=ServerApi('1'))
         # Send a ping to confirm a successful connection
         client.admin.command('ping')
         return client
@@ -109,6 +112,16 @@ def log_to_mongodb(user_prompt, bot_response):
         except Exception as e:
             # Silently fail for the user, but log for the developer
             print(f"Could not log message to MongoDB: {e}")
+
+def fetch_chat_logs():
+    """Fetches the most recent chat logs from MongoDB."""
+    db = get_db()
+    collection = get_collection(db)
+    if collection is not None:
+        # Fetch the last 25 logs, sorted by most recent
+        logs = collection.find().sort("timestamp", DESCENDING).limit(25)
+        return list(logs)
+    return []
 
 
 # --- Chat History Management ---
